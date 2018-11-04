@@ -1,6 +1,4 @@
-
-# About the project
-
+#about the course
 #this course is so interesting and i am already loving this course. 
 
 [GitHub repository](https://github.com/sanisaha/IODS-project)
