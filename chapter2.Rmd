@@ -1,24 +1,39 @@
-# regression analysis
+# regression Analysis
 
 ```{r}
 #1
 mydata <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt", sep = ",", header=TRUE)
 str(mydata)
 dim(mydata)
+
+```
 #the dataset(mydata) has 166 observation and 7 variables. It has 7 columns where points column has all the observation greater than 0. 
 
+
 #2
+```{r }
 plot(mydata)
+
+```
 #we can show the data as a scatter plot. It gives a graphical overview of our data. But it is very difficult to make conclusion of the whole data as gender column has no numerical value, otherwise histogram or barplot will be good function for describing the data. we can describe the variables separately or may be as a comparison to other variables by following way.
 
+```{r }
 hist(mydata$age)
+
+```
 #from histogram of age variables we can say that, most of the obervations were age between 20-25.
+
+```{r }
 plot(mydata$gender)
+```
 #by ploting gender with plot function we can say that most of the observation was females.
+```{r }
 library(ggplot2)
 p1 <- ggplot(mydata, aes(x = age, y = points))
 p2 <- p1 + geom_point()
 p2
+
+```
 #throgh ggplot2 we can compare 2 variables at a time, here we can see that most the observations were from 20-25 age and they obtain different number of points. those are older than 50 get comparatavely less mark but their number is very small. similarly we can do it for other variables too.
 
 
