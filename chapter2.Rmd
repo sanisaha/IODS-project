@@ -36,6 +36,12 @@ p2
 ```
 #throgh ggplot2 we can compare 2 variables at a time, here we can see that most the observations were from 20-25 age and they obtain different number of points. those are older than 50 get comparatavely less mark but their number is very small. similarly we can do it for other variables too.
 
+```{r }
+RM <- lm(points ~ attitude + age + stra, data = mydata)
+summary(RM)
+
+```
+
 
 
 ```
