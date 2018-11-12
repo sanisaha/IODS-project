@@ -1,7 +1,8 @@
 # regression Analysis
 
-```{r}
 #1
+
+```{r}
 mydata <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt", sep = ",", header=TRUE)
 str(mydata)
 dim(mydata)
@@ -36,12 +37,42 @@ p2
 ```
 #throgh ggplot2 we can compare 2 variables at a time, here we can see that most the observations were from 20-25 age and they obtain different number of points. those are older than 50 get comparatavely less mark but their number is very small. similarly we can do it for other variables too.
 
+#3
+
 ```{r }
-RM <- lm(points ~ attitude + age + stra, data = mydata)
+RM <- lm(points ~ gender + attitude +  stra, data = mydata)
 summary(RM)
 
 ```
 
 
 
+#here points is the target or dependent variable. gender,attitude and stra are the independent or explanatory variable. Here, Multiple R-squared value is 0.2051 which means about 21% variation in points can be explained by our model (explained by gender, attitude and stra). Here, by F-statistics and p-value we can know the overall significance of our model. By the Residual standard error we can know how much differences in observed and predicted value of target variable(points).we found estimate value of Intercept is 8.9798, which meand the value of points is 8.9798 when all the value of explanatory variables are 0. estimate value of gender is -0.2236, which means for 1year increase in gender, points decrease by 0.2236. Although here p-value is very high and we can say that there is no relationship between gender and points.
+
+#In our model only attitude is highly significant. Gender has the least significance among three values. so, let's try removing gender from our model
+
+```{r }
+RM <- lm(points ~ attitude +  stra, data = mydata)
+summary(RM)
+
 ```
+
+#after removing gender from our data it shows stra has very low significane. But R square value is almost same. Let's remove stra from model and see what happens.
+
+```{r }
+RM <- lm(points ~ attitude, data = mydata)
+summary(RM)
+
+```
+#here R2 value is 0.1906, which means our model can now explain 19% of variation in points by attitude. And it is highly significant.
+
+#4
+```{r }
+summary(RM)
+
+```
+
+#through the summary we can explain the relationship between our target and explanatory variables. here Estimate value of attitude is 3.5255, which means 1unit increase in attitude points increase 3.5255 and it's a positive corelation. Residual std.error is 5.32 which is the difference between observed and estimate value of points. here, R2 value is 0.1906, which means our model can now explain 19% of variation in points by attitude
+
+#5
+
