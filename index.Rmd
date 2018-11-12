@@ -1,5 +1,5 @@
 ---
-title: "IODS course Project"
+title: "IODS course project"
 author: "Sani Saha"
 output:
   html_document:
