@@ -208,4 +208,13 @@ loss_func(class = mydata$high_use, prob = mydata$probability)
 
 6 so , about 30% of observation incorrectly cassified,
 
+7 bonus
+
+```{r}
+library(boot)
+cv <- cv.glm(data = mydata, cost = loss_func, glmfit = lr2, K = 10)
+cv$delta[1]
+```
+With 10-fold cross-validation the prediction error is around 0.30. which is higherer than in the data camp exercise.
+
 

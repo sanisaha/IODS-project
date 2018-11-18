@@ -452,6 +452,12 @@ g + geom_point()</code></pre>
 loss_func(class = mydata$high_use, prob = mydata$probability)</code></pre>
 <pre><code>## [1] 0.3010471</code></pre>
 <p>6 so , about 30% of observation incorrectly cassified,</p>
+<p>7 bonus</p>
+<pre class="r"><code>library(boot)
+cv &lt;- cv.glm(data = mydata, cost = loss_func, glmfit = lr2, K = 10)
+cv$delta[1]</code></pre>
+<pre><code>## [1] 0.3062827</code></pre>
+<p>With 10-fold cross-validation the prediction error is around 0.30. which is higherer than in the data camp exercise.</p>
 </div>
 
 
