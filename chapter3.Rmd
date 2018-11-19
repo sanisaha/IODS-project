@@ -16,15 +16,16 @@ mydata[1,]
 ```
 
 
-2 The above data is about alcohol consumption in two Portugese school students. The data has 380 rows and 36 columns. Or, in other way it has 35 variables. The data set modeled under binary classification
+2. The above data is about alcohol consumption in two Portugese school students. The data has 380 rows and 36 columns. Or, in other way it has 35 variables. The data set modeled under binary classification
 
-3I am choosing 4 random variables namely age, failures, health and freetime as explanatory variables and high_use as a target variables. I am assuming that there is a strong positive correlation between high_use with each variables.
+3. I am choosing 4 random variables namely age, failures, health and freetime as explanatory variables and high_use as a target variables. I am assuming that there is a strong positive correlation between high_use with each variables.
 
-
+4.alcohol consumption vs different variables
 alc_use vs age
 
 ```{r}
 attach(mydata)
+cor(high_use, age)
 mytable <- table(high_use, age) 
 addmargins(mytable)
 mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, sub = "high_use", ylab = "age", main = "alc_use vs age")
@@ -44,17 +45,18 @@ g1 + geom_boxplot() + ggtitle("age vs high_use")
 boxplot(high_use ~age, data=mydata, main="alcohol consumption by age", 
   	xlab="age", ylab="alc_use")
 
+
   	
 ```
 
+alcohol consumption is positively related with age(corelation = 0.11), but there is no strong relationship. from the boxplot we can see that for high alcohol consumption most of the observation(50%) remain at age 16 to 18. while low consumption(50%) 16 to 17 age.
 
 ```{r}
-cor(failures, high_use)
-
 attach(mydata)
+cor(failures, high_use)
 mytable <- table(high_use, failures) 
 addmargins(mytable)
-mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, sub = "high_use", ylab = "failures", main = "alc_use vs failures")
+mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, main = "alc_use vs failures")
 
 counts <- table(mydata$high_use, mydata$failures)
 barplot(counts, main="alc consumption by failures",
@@ -68,74 +70,75 @@ g1 + geom_boxplot() + ylab("failures")
 
 g1 + geom_boxplot() + ggtitle("failures vs high_use")
 
-boxplot(high_use ~ failures, data=mydata, main="alcohol consumption by age", 
+boxplot(high_use ~ failures, data=mydata, main="alcohol consumption by failures", 
   	xlab="failures", ylab="alc_use")
 
 
 
 ```
+failures is strongly corelated with alcohol consumption, early failure consumed more alcohol then late failure. from the boxplot we can see that for high alcohol consumption most of the observation(more than 50%) remain at failure level 0.
 
-high_use vs failures
+high_use vs health
 ```{r}
-cor(failures, high_use)
-
 attach(mydata)
-mytable <- table(high_use, failures) 
+cor(health, high_use)
+mytable <- table(high_use, health) 
 addmargins(mytable)
-mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, sub = "high_use", ylab = "failures", main = "alc_use vs failures")
+mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, main = "alc_use vs health")
 
-counts <- table(mydata$high_use, mydata$failures)
-barplot(counts, main="alc consumption by failures",
-  xlab="failures", col=c("darkblue", "red"),
+counts <- table(mydata$high_use, mydata$health)
+barplot(counts, main="alc consumption by health",
+  xlab="health", col=c("darkblue", "red"),
  	legend = rownames(counts))
 
 library(ggplot2)
-g1 <- ggplot(mydata, aes(x = high_use, y = failures))
+g1 <- ggplot(mydata, aes(x = high_use, y = health))
 
-g1 + geom_boxplot() + ylab("failures")
+g1 + geom_boxplot() + ylab("health")
 
-g1 + geom_boxplot() + ggtitle("failures vs high_use")
+g1 + geom_boxplot() + ggtitle("health vs high_use")
 
-# Boxplot 
-boxplot(high_use ~ failures, data=mydata, main="alcohol consumption by age", 
-  	xlab="failures", ylab="alc_use")
+boxplot(high_use ~ health, data=mydata, main="alcohol consumption by health", 
+  	xlab="health", ylab="high_use")
 
 
 
 ```
+there is very poor correlation between health and alcohol use(0.05). from the boxplot we can see that for high alcohol consumption most of the observation(50%) remain at health level 4 to 5.
 
 
+alcohol consumption vs freetime
 ```{r}
 
-cor(failures, high_use)
-
 attach(mydata)
-mytable <- table(high_use, failures) 
+cor(freetime, high_use)
+mytable <- table(high_use, freetime) 
 addmargins(mytable)
-mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, sub = "high_use", ylab = "failures", main = "alc_use vs failures")
+mosaicplot( t(mytable), col = c("firebrick", "goldenrod1"), cex.axis = 0.5, main = "alc_use vs freetime")
 
-counts <- table(mydata$high_use, mydata$failures)
-barplot(counts, main="alc consumption by failures",
-  xlab="failures", col=c("darkblue", "red"),
+counts <- table(mydata$high_use, mydata$freetime)
+barplot(counts, main="alc consumption by freetime",
+  xlab="freetime", col=c("darkblue", "red"),
  	legend = rownames(counts))
 
 library(ggplot2)
-g1 <- ggplot(mydata, aes(x = high_use, y = failures))
+g1 <- ggplot(mydata, aes(x = high_use, y = freetime))
 
-g1 + geom_boxplot() + ylab("failures")
+g1 + geom_boxplot() + ylab("freetime")
 
-g1 + geom_boxplot() + ggtitle("failures vs high_use")
+g1 + geom_boxplot() + ggtitle("freetime vs high_use")
 
-# Boxplot 
-boxplot(high_use ~ failures, data=mydata, main="alcohol consumption by age", 
-  	xlab="failures", ylab="alc_use")
+boxplot(high_use ~ freetime, data=mydata, main="alcohol consumption by freetime", 
+  	xlab="freetime", ylab="high_use")
 
 
 
 ```
 
 
- 5 from the cross tabulations and bar chart we can see that there is a strong positive correlation between high_use and other variables. Let,s now fit the logistic regression model.
+  from the cross tabulations and bar chart we can see that there is a strong positive correlation between high_use and freetime(0.15). Highest number of observation shown in level 3 freetime, while 50 % of the observation remain at freetime  level 3to 4 .
+  
+5.Let,s now fit the logistic regression model.
 
 
 ```{r}
@@ -144,8 +147,10 @@ summary(lr)
 
 ```
 
-6From the model we can see that failures and freetime has the most significant relationship with alcohol use.
+Deviance residuals, which are a measure of model fit. It shows the distribution of the deviance residuals for individual cases used in the model. From the model we can see that failures and freetime has the most significant relationship with alcohol use. 
 
+The logistic regression coefficients give the change in the log odds of the outcome for a one unit increase in the predictor variable.
+For every one unit change in age, the log odds of alcohol use increases by 0.17.
 
 
 ```{r}
@@ -156,14 +161,15 @@ cbind(OR,CI)
 
 ```
 
-6from the odd ratios at 97.5% CI we can see that failures has the highest odd ratio and then freetime , compare to age and heath. Which means they are more correlated to alcohol use. Lets, remove age and health from the model and fil the model again
+from the odd ratios failures has the highest odd ratio(1.53) with 95% confidence interval(1.05 to 2.23) compare to freetime, age and heath. Which means for a one unit increase in failures, the odds of alcohol consumption increase by a factor of 1.53 and in 95% occasion it is true.
+Lets, remove age and health from the model and fil the model again
 
 
 ```{r}
 lr2 <- glm(high_use ~ failures + freetime, data = mydata, family = "binomial")
 summary(lr2)
 ```
-
+both failures and freetime is now statiscaly significant.
 
 ```{r}
 coef(lr2)
@@ -174,12 +180,10 @@ cbind(OR,CI)
 
 ```
 
+from the odd ratios at 95% CI we can see that failures has the highest odd ratio 1.65 and it improve from our previous model. so, we are now 95% sure, that failure affect alcohol consumption and for 1 unit change in failure, the odds of alcohol consumption increase by a factor of 1.65.
 
 
-
-
-6 from the odd ratios at 97.5% CI we can see that failures has the highest odd ratio 2.39 and it improve from our previous model.
-
+6. 2*2 cross tabulation of predictions versus the actual values
 
 ```{r}
 probabilities <- predict(lr2, type = "response")
@@ -206,9 +210,11 @@ loss_func(class = mydata$high_use, prob = mydata$probability)
 ```
 
 
-6 so , about 30% of observation incorrectly cassified,
+6. so , about 30% of observation incorrectly classified. while, the todal loss prediction is 100.
+comparative performance
+If, we would take low_use(FALSE for alcohol use is greater than 2) instead of high_use we would get 70% incorrect classified observation.
 
-7 bonus
+7. bonus
 
 ```{r}
 library(boot)
