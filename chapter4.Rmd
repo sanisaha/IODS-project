@@ -1,0 +1,152 @@
+#Clustering and Classification
+---
+title: "clustering and classification"
+author: "sanisaha"
+date: "November 25, 2018"
+output: html_document
+---
+
+2.
+```{r}
+library(MASS)
+data("Boston")
+str(Boston)
+dim(Boston)
+
+```
+
+The above is about housing values in Boston town. The data contain 506 observation and 14 variables. All the 14 variables are related to housing values. Among the data the first variable is crim(per capita crime rate in the town), which we will use as a target variable in later.
+
+3.
+```{r cars}
+library(ggplot2)
+plot(Boston)
+
+```
+
+
+```{r}
+hist(Boston$crim)
+```
+
+```{r}
+hist(Boston$age)
+```
+The data has 14 variables and we can see them from the ggplot. Mostly there aged people are high in number. And crime rate is very less.
+
+4.
+```{r }
+scale_boston <- scale(Boston)
+summary(scale_boston)
+scale_boston <- as.data.frame(scale_boston)
+quantiles <- quantile(scale_boston$crim)
+quantiles
+crime <- cut(scale_boston$crim, breaks = quantiles, include.lowest = TRUE, labels = c("low", "med_low", "med_high", "high"))
+library(dplyr)
+scale_boston <- dplyr::select(scale_boston, -crim)
+scale_boston <- data.frame(scale_boston, crime)
+
+set.seed(1234)
+n <- nrow(scale_boston)
+ind <- sample(n, size = n * 0.8)
+train <- scale_boston[ind,]
+test <- scale_boston[-ind,]
+
+
+```
+After scaling the data, from the summary of scaled data we can see data as a standarized data. we can see minimum and maximun value of a variable, as well as mean, median and quarter of every column(variable).
+
+5.
+```{r}
+lda.fit <- lda(crime ~ ., data = train)
+lda.arrows <- function(x, myscale = 1, arrow_heads = 0.1, color = "red", tex = 0.75, choices = c(1,2)){
+  heads <- coef(x)
+  arrows(x0 = 0, y0 = 0, 
+         x1 = myscale * heads[,choices[1]], 
+         y1 = myscale * heads[,choices[2]], col=color, length = arrow_heads)
+  text(myscale * heads[,choices], labels = row.names(heads), 
+       cex = tex, col=color, pos=3)
+}
+
+# target classes as numeric
+classes <- as.numeric(train$crime)
+
+# plot the lda results
+plot(classes, dimen = 2, col = classes, pch = classes)
+lda.arrows(lda.fit, myscale = 1)
+
+
+```
+
+```{r}
+
+# save the correct classes from test data
+correct_classes <- test$crime
+
+# remove the crime variable from test data
+test <- dplyr::select(test, -crime)
+
+lda.pred <- predict(lda.fit, newdata = test) 
+table(correct = correct_classes, predicted = lda.pred$class)
+
+
+
+
+
+                      
+                      
+
+
+
+```
+The model predicted 4 crime category in different standards. Model can perfectly predict high category(100%). But other category can not predict correctly. Mainly low and med_low category. The model 28% mispredict low category as a med_low category . 
+
+```{r}
+# load MASS and Boston
+library(MASS)
+data('Boston')
+scaled_boston <- scale(Boston)
+# euclidean distance matrix
+dist_eu <- dist(scaled_boston)
+summary(dist_eu)
+# manhattan distance matrix
+dist_man <- dist(scaled_boston, method = 'manhattan')
+summary(dist_man)
+
+km <-kmeans(scaled_boston, centers = 4)
+pairs(scaled_boston, col = km$cluster)
+
+set.seed(123)
+k_max <- 10
+twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss})
+library(ggplot2)
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+km <-kmeans(Boston, centers = 2)
+pairs(Boston, col = km$cluster)
+
+
+```
+
+```{r}
+set.seed(123)
+k_max <- 8
+twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss})
+library(ggplot2)
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+km <-kmeans(Boston, centers = 2)
+pairs(Boston, col = km$cluster)
+
+```
+
+```{r}
+set.seed(123)
+k_max <- 2
+twcss <- sapply(1:k_max, function(k){kmeans(Boston, k)$tot.withinss})
+library(ggplot2)
+qplot(x = 1:k_max, y = twcss, geom = 'line')
+km <-kmeans(Boston, centers = 2)
+pairs(Boston, col = km$cluster)
+
+```
+
+here, we can see that cluster 2 is optimal for this data. It seems that in claster 2, total within sum square cluster change much when total claster changes to 2.
