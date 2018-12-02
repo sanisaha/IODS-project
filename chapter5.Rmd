@@ -44,7 +44,10 @@ library(ggplot2)
 
 cor(human) %>% corrplot()
 summary(human)
-````
+
+```
+
+
 
 we can also see the level of correlation between variables throgh this corrplot. here as previously described, LEB has positive correlation with GNI(light blue). we can see that male and female ration in parliament has very low correlation with other variables. from the summary we can the min and max value of variables and also other statistical figure. we can see that there is high difference in male/female education ration in countries and also per capita GNI is hugely differ from country to country.
 
@@ -52,6 +55,7 @@ we can also see the level of correlation between variables throgh this corrplot.
 
 
 ```{r}
+library(dplyr)
 
 pc_human <- prcomp(human)
 summary(pc_human)
@@ -63,6 +67,10 @@ This is a poor biplot of the data. The main idea of the biplot is by viewing the
 4. pca on standard data
 
 ```{r}
+library(dplyr)
+library(FactoMineR)
+library(ggplot2)
+library(tidyr)
 human_std <- scale(human)
 summary(human_std)
 pc_human_std <- prcomp(human_std)
@@ -94,15 +102,11 @@ dim(tea)
 str(tea)
 summary(tea)
 
-
-
-
-
 ```
 
 ```{r}
 keep_columns <- c("Sport", "slimming", "relaxing", "healthy", "sugar", "effect.on.health")
-tea_time <- select(tea, one_of(keep_columns))
+tea_time <- dplyr::select(tea, one_of(keep_columns))
 mca <- MCA(tea_time, graph = FALSE)
 summary(mca)
 plot(mca, invisible=c("ind"), habillage="quali")
