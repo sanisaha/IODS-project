@@ -1,0 +1,112 @@
+#Dimentionaly reduction technique
+title: "Dimentionaly reduction technique"
+author: "sanisaha"
+date: "December 2, 2018"
+output: html_document
+---
+
+
+1. read of the data
+```{r}
+human <- read.table(file = "C:/Users/ratul/Documents/GitHub/IODS-project/data/human.csv", sep = ",", header = T)
+str(human)
+human$X <- NULL
+str(human)
+
+
+
+```
+the data has alltogether 195 observation and 19 variables. The variables names are written in short form. "GNI" = Gross National Income per capita
+"LEB" = Life expectancy at birth
+"E_SCHOOL" = Expected years of schooling 
+"MMR" = Maternal mortality ratio
+"ABR" = Adolescent birth rate
+"PARLIAMENT_S" = Percetange of female representatives in parliament
+"EDU2F" = Proportion of females with at least secondary education
+"EDU2M" = Proportion of males with at least secondary education
+"LabF" = Proportion of females in the labour force
+"LabM" " Proportion of males in the labour force
+"EDU2_Ratio" = EDU2F / EDU2M
+"Lab_Ratio" = LabF / LabM
+
+2. Graphical presentation of the data
+```{r}
+library(GGally)
+ggpairs(human)
+```
+from the ggpairs we can see that all the variables have numeric values. Thats why we got scatter plots else we would get histogram if we had any categorial variable. from the above graph we can see that  corelation between two variables. For example, there is a positive correlation between gross national income per capita and expected days in school.  we can also see the relation through scatter plots and normal graphs. 
+
+
+```{r}
+library(corrplot)
+library(dplyr)
+library(ggplot2)
+
+cor(human) %>% corrplot()
+summary(human)
+````
+
+we can also see the level of correlation between variables throgh this corrplot. here as previously described, LEB has positive correlation with GNI(light blue). we can see that male and female ration in parliament has very low correlation with other variables. from the summary we can the min and max value of variables and also other statistical figure. we can see that there is high difference in male/female education ration in countries and also per capita GNI is hugely differ from country to country.
+
+3.principal component analysis
+
+
+```{r}
+
+pc_human <- prcomp(human)
+summary(pc_human)
+biplot(pc_human, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+```
+This is a poor biplot of the data. The main idea of the biplot is by viewing the direction of angles one can have a idea about correaltion between different features. But here most of the angles are inderminate angle(we can see see them above the plot), and that because of data is not scales properly. The variance between variables differ hugely which might be a problem. so we need scaled data to biplot.
+
+4. pca on standard data
+
+```{r}
+human_std <- scale(human)
+summary(human_std)
+pc_human_std <- prcomp(human_std)
+summary(pc_human_std)
+biplot(pc_human_std, choices = 1:2, cex = c(0.8, 1), col = c("grey40", "deeppink2"))
+
+
+```
+here we can see far more better biplot than the previous one. Here we can see the angles and their direction to the different pc. The results are different. this is because we scaled the data. If we see the summary of two data we can easily seen the difference. After scaling there is a very less difference in min and maximum value than earlier. Also the mean in all variables is same. so what we did, we reduce the dimension of the data and we can see clear arrows as correlation between variables.
+
+we can create three groups of variable those are relate to each other in same group. 
+1st group or quality of life in relation with basic foundation: expected days in school, Gross national income per capita, expentacy of life and male/female ratio in school.
+2nd group or female participation in economy: female participation in parliament and male/female ratio in labour 
+3rd group or female reproduction quality : maternal mortality rate and adolescent birth rate. 
+
+from the bioplot, the smaller the space between two angles the larger the correlation. so here we can large corelation between each variables in one group. Elsewise, there is a negative or no correlation between variables from two groups as space is higher. For example female participation in parliament has negative correlation with maternal mortality rate.
+
+5.
+from the biplot we can see that group 1 or quality of life in relation with basic foundation is negatively related with pc1 and almost no correlation with pc2. 2nd group or female participation in economy has positive correlation with pc2 and amost zero correlation with pc1. 3rd group or female reproduction quality has positive corelation with pc1 and almost zero correlation with pc2. 
+contribution to pc1 and pc2:  so if the features directed to way  pc1 directed are pc1 component and if the features directed to way  pc2 directed are pc2 component. Here group 1 and 3 are contributing to pc1 components and group2 contributing to pc2 components. From the summary we can say that, pc1 has 0.53 proportion of variance and pc2 has 0.16 proportion of variance. Alltogether they are 0.69, which means this bioplot can explain almost 70% of variance in different countries.
+
+6.
+```{r}
+library(FactoMineR)
+library(ggplot2)
+library(tidyr)
+tea <- read.table("http://factominer.free.fr/course/donnees/data_MCA_Tea.csv", sep=";", header=TRUE)
+dim(tea)
+str(tea)
+summary(tea)
+
+
+
+
+
+```
+
+```{r}
+keep_columns <- c("Sport", "slimming", "relaxing", "healthy", "sugar", "effect.on.health")
+tea_time <- select(tea, one_of(keep_columns))
+mca <- MCA(tea_time, graph = FALSE)
+summary(mca)
+plot(mca, invisible=c("ind"), habillage="quali")
+```
+
+here , from the summary we can see the value of categorial variables not even close to 1 , so its not worthy to go for dimension.
+from the biplot we can see that there is a positive correlation between no sugar and not sportsman. There is a negative correlation between no relaxing and effect on health as there is a large space between them.
