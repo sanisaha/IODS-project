@@ -1,4 +1,4 @@
----
+#Longitudinal data Anaysis
 title: "Analysis of longitudinal data"
 author: "sanisaha"
 date: "December 9, 2018"
@@ -9,22 +9,136 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", sep = '', header = T)
+library(dplyr)
+library(tidyr)
+RATS$ID <- factor(RATS$ID)
+RATS$Group<- factor(RATS$Group)
 
-```{r cars}
-summary(cars)
+RATSL <-  RATS %>% gather(key = WD, value = weight, -ID, -Group)
+RATSL <-  RATSL %>% mutate(Time = as.integer(substr(WD,3,4)))
+glimpse(RATSL)
+str(RATSL)
+ggplot(RATSL, aes(x = Time, y = weight, group = ID)) +
+  geom_line(aes(linetype = Group)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "weight (grams)") +
+  theme(legend.position = "top")
+
+                       
+ 
+
+
 ```
 
-## Including Plots
+```{r}
+ggplot(RATSL, aes(y=weight, x=factor(Time), fill=Group)) +
+  geom_boxplot()
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+# Standardise the scores:
+RATSL <- RATSL %>%
+  group_by(Time) %>%
+  mutate( stdweight = (weight - mean(weight))/sd(weight) ) %>%
+  ungroup()
+glimpse(RATSL)
+
+ggplot(RATSL, aes(x = Time, y = stdweight, group = ID)) +
+  geom_line(aes(linetype = Group)) +
+  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
+  scale_y_continuous(name = "standardweight (grams)") +
+  theme(legend.position = "top")
+
+
+```
+
+```{r}
+ggplot(RATSL, aes(y=stdweight, x=factor(Time), fill=Group)) +
+  geom_boxplot()
+
+
+```
+
+
+```{r}
+# Number of weeks, baseline (week 0) included:
+n <- RATSL$Time %>% unique() %>% length()
+# Make a summary data:
+RATSS <- RATSL %>%
+  group_by(Group, Time) %>%
+  summarise( mean=mean(weight), se=sd(weight)/sqrt(n) ) %>%
+  ungroup()
+glimpse(RATSS)
+p1 <- ggplot(RATSS, aes(x = Time, y = mean, linetype = Group, shape = Group))
+p2 <- p1 + geom_line() + scale_linetype_manual(values = c(1:3))
+p3 <- p2 + geom_point(size=3) + scale_shape_manual(values = c(1:3))
+p4 <- p3 + geom_errorbar(aes(ymin=mean-se, ymax=mean+se, linetype="1"), width=0.3)
+p5 <- p4 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p6 <- p5 + theme(legend.position = c(0.8,0.8))
+p7 <- p6 + scale_y_continuous(name = "mean(weight) +/- se(weight)")
+p7
+
+```
+
+```{r}
+RATSL8S <- RATSL %>%
+  filter(Time > 0) %>%
+  group_by(Group, ID) %>%
+  summarise( mean=mean(weight) ) %>%
+  ungroup()
+glimpse(RATSL8S)
+p1 <- ggplot(RATSL8S, aes(x = Group, y = mean))
+p2 <- p1 + geom_boxplot()
+p3 <- p2 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p4 <- p3 + stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white")
+p5 <- p4 + scale_y_continuous(name = "mean(weight), weeks 1-8")
+p5
+
+
+```
+
+```{r}
+# Remove the outlier:
+RATSL8S1 <- RATSL8S %>%
+  filter(mean < 500)
+glimpse(RATSL8S1)
+p1 <- ggplot(RATSL8S1, aes(x = Group, y = mean))
+p2 <- p1 + geom_boxplot()
+p3 <- p2 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p4 <- p3 + stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white")
+p5 <- p4 + scale_y_continuous(name = "mean(weight), weeks 1-8")
+p5
+
+
+```
+
+```{r}
+RATSL8S2 <- RATSL8S1 %>%
+  filter(mean > 250)
+glimpse(RATSL8S2)
+p1 <- ggplot(RATSL8S2, aes(x = Group, y = mean))
+p2 <- p1 + geom_boxplot()
+p3 <- p2 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p4 <- p3 + stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white")
+p5 <- p4 + scale_y_continuous(name = "mean(weight), weeks 1-8")
+p5
+
+```
+
+```{r}
+baseline <- RATS$WD1
+RATSL8S3 <- RATSL8S %>%
+  mutate(baseline)
+# Fit the ANCOVA model and see the results:
+fit <- lm(mean ~ baseline + Group, data = RATSL8S3)
+summary(fit)
+anova(fit)
+```
+
+
