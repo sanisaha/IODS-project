@@ -9,10 +9,11 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+1. RATS data Analysis
 
 ```{r}
 RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", sep = '', header = T)
+library(ggplot2)
 library(dplyr)
 library(tidyr)
 RATS$ID <- factor(RATS$ID)
@@ -22,24 +23,20 @@ RATSL <-  RATS %>% gather(key = WD, value = weight, -ID, -Group)
 RATSL <-  RATSL %>% mutate(Time = as.integer(substr(WD,3,4)))
 glimpse(RATSL)
 str(RATSL)
-ggplot(RATSL, aes(x = Time, y = weight, group = ID)) +
-  geom_line(aes(linetype = Group)) +
-  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
-  scale_y_continuous(name = "weight (grams)") +
-  theme(legend.position = "top")
+p1 <- ggplot(RATSL, aes(x = Time, y = weight, linetype = ID))
+p2 <- p1 + geom_line() + scale_linetype_manual(values = rep(1:10, times=4))
+p2
+p3 <- p2 + facet_grid(. ~ Group, labeller = label_both)
+p4 <- p3 + theme_bw() + theme(legend.position = "none")
+p5 <- p4 + theme(panel.grid.minor.y = element_blank())
+p6 <- p5 + scale_y_continuous(limits = c(min(RATSL$weight), max(RATSL$weight)))
+p6
 
-                       
- 
 
-
-```
-
-```{r}
-ggplot(RATSL, aes(y=weight, x=factor(Time), fill=Group)) +
-  geom_boxplot()
-
+                  
 
 ```
+
 
 ```{r}
 # Standardise the scores:
@@ -49,25 +46,22 @@ RATSL <- RATSL %>%
   ungroup()
 glimpse(RATSL)
 
-ggplot(RATSL, aes(x = Time, y = stdweight, group = ID)) +
-  geom_line(aes(linetype = Group)) +
-  scale_x_continuous(name = "Time (days)", breaks = seq(0, 60, 10)) +
-  scale_y_continuous(name = "standardweight (grams)") +
-  theme(legend.position = "top")
-
-
-```
-
-```{r}
-ggplot(RATSL, aes(y=stdweight, x=factor(Time), fill=Group)) +
-  geom_boxplot()
+p1 <- ggplot(RATSL, aes(x = Time, y = stdweight, linetype = ID))
+p2 <- p1 + geom_line() + scale_linetype_manual(values = rep(1:10, times=4))
+p3 <- p2 + facet_grid(. ~ Group, labeller = label_both)
+p4 <- p3 + theme_bw() + theme(legend.position = "none")
+p5 <- p4 + theme(panel.grid.minor.y = element_blank())
+p6 <- p5 + scale_y_continuous(name = "standardized bprs")
+p6
 
 
 ```
 
 
+
+
 ```{r}
-# Number of weeks, baseline (week 0) included:
+# Number of Times, baseline (Time 0) included:
 n <- RATSL$Time %>% unique() %>% length()
 # Make a summary data:
 RATSS <- RATSL %>%
@@ -87,6 +81,18 @@ p7
 ```
 
 ```{r}
+p1 <- ggplot(RATSL, aes(x = factor(Time), y = weight, fill = Group))
+p2 <- p1 + geom_boxplot(position = position_dodge(width = 0.9))
+p3 <- p2 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p4 <- p3 + theme(legend.position = c(0.8,0.8))
+p5 <- p4 + scale_x_discrete(name = "Time")
+# Black & White version:
+#p6 <- p5 + scale_fill_grey(start = 0.5, end = 1)
+p5
+```
+
+
+```{r}
 RATSL8S <- RATSL %>%
   filter(Time > 0) %>%
   group_by(Group, ID) %>%
@@ -97,22 +103,24 @@ p1 <- ggplot(RATSL8S, aes(x = Group, y = mean))
 p2 <- p1 + geom_boxplot()
 p3 <- p2 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 p4 <- p3 + stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white")
-p5 <- p4 + scale_y_continuous(name = "mean(weight), weeks 1-8")
+p5 <- p4 + scale_y_continuous(name = "mean(weight), Time 0-60")
 p5
 
 
 ```
 
+
+
 ```{r}
 # Remove the outlier:
 RATSL8S1 <- RATSL8S %>%
-  filter(mean < 500)
+  filter(mean < 550)
 glimpse(RATSL8S1)
 p1 <- ggplot(RATSL8S1, aes(x = Group, y = mean))
 p2 <- p1 + geom_boxplot()
 p3 <- p2 + theme_bw() + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 p4 <- p3 + stat_summary(fun.y = "mean", geom = "point", shape=23, size=4, fill = "white")
-p5 <- p4 + scale_y_continuous(name = "mean(weight), weeks 1-8")
+p5 <- p4 + scale_y_continuous(name = "mean(weight), time 1-60")
 p5
 
 
@@ -142,3 +150,112 @@ anova(fit)
 ```
 
 
+
+2.BPRS data Analysis
+```{r}
+BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep = '', header = T)
+
+names(BPRS)
+str(BPRS)
+summary(BPRS)
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+BPRS$subject <- factor(BPRS$subject)
+BPRS$treatment <- factor(BPRS$treatment)
+
+
+BPRSL <-  BPRS %>% gather(key = weeks, value = bprs, -treatment, -subject)
+BPRSL <-  BPRSL %>% mutate(week = as.integer(substr(weeks,5,5)))
+
+glimpse(BPRSL)
+
+str(BPRSL)
+
+str(BPRS)
+p1 <- ggplot(BPRSL, aes(x = week, y = bprs, group = subject))
+p2 <- p1 + geom_text(aes(label = treatment))
+p3 <- p2 + scale_x_continuous(name = "week", breaks = seq(0, 8, 1.5))
+p4 <- p3 + scale_y_continuous(name = "bprs")
+p5 <- p4 + theme_bw()
+p6 <- p5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p6
+
+
+```
+
+
+```{r}
+library(lme4)
+BPRS_reg <- lm(bprs ~ week + treatment, data = BPRSL)
+summary(BPRS_reg)
+
+
+```
+
+
+```{r}
+p1 <- ggplot(BPRSL, aes(x = week, y = bprs))
+p1
+p2 <- p1 + geom_line(aes(linetype = treatment))
+p2
+p3 <- p2 + scale_x_continuous(name = "week", breaks = seq(0, 8, 1.5))
+p4 <- p3 + scale_y_continuous(name = "bprs")
+p5 <- p4 + theme_bw() + theme(legend.position = "top")
+p6 <- p5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p6
+
+
+```
+
+```{r}
+pairs(BPRS[, 1:11], cex = 0.7)
+```
+
+```{r, echo=TRUE}
+library("lme4")
+BPRS_ref <- lmer(bprs ~ week + treatment + (1 | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref)
+# dummies (in Table) vs summary output: D1 = Group2, D2 = Group3
+```
+
+```{r, echo=TRUE}
+BPRS_ref1 <- lmer(bprs ~ week + treatment + (week | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref1)
+# dummies (in Table) vs summary output: D1 = Group2, D2 = Group3
+anova(BPRS_ref1, BPRS_ref)
+
+```
+
+
+```{r, echo=TRUE}
+BPRS_ref2 <- lmer(bprs ~ week * treatment + (week | subject), data = BPRSL, REML = FALSE)
+summary(BPRS_ref2)
+# dummies (in Table) vs summary output: D1 = Group2, D2 = Group3
+anova(BPRS_ref1, BPRS_ref2)
+```
+
+
+```{r, echo=TRUE, fig.width=3, fig.height=4}
+Fitted <- fitted(BPRS_ref1)
+BPRSL <- BPRSL %>% mutate(Fitted)
+p1 <- ggplot(BPRSL, aes(x = week, y = bprs))
+p2 <- p1 + geom_line(aes(linetype = treatment))
+p3 <- p2 + scale_x_continuous(name = "week", breaks = seq(0, 8, 1.5))
+p4 <- p3 + scale_y_continuous(name = "bprs")
+p5 <- p4 + theme_bw() + theme(legend.position = "right") # "none" in the book
+p6 <- p5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p7 <- p6 + ggtitle("Observed")
+graph1 <- p7
+p1 <- ggplot(BPRSL, aes(x = week, y = Fitted))
+p2 <- p1 + geom_line(aes(linetype = treatment))
+p3 <- p2 + scale_x_continuous(name = "week", breaks = seq(0, 8, 1.5))
+p4 <- p3 + scale_y_continuous(name = "bprs")
+p5 <- p4 + theme_bw() + theme(legend.position = "right")
+p6 <- p5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+p7 <- p6 + ggtitle("Fitted")
+graph2 <- p7
+graph1; graph2
+```
