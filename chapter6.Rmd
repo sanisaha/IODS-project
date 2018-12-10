@@ -1,15 +1,13 @@
 #Longitudinal data Anaysis
+
 title: "Analysis of longitudinal data"
 author: "sanisaha"
 date: "December 9, 2018"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-1. RATS data Analysis
+1. RATS data Analysis according to chapter 8...
 
 ```{r}
 RATS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/rats.txt", sep = '', header = T)
@@ -23,6 +21,11 @@ RATSL <-  RATS %>% gather(key = WD, value = weight, -ID, -Group)
 RATSL <-  RATSL %>% mutate(Time = as.integer(substr(WD,3,4)))
 glimpse(RATSL)
 str(RATSL)
+
+```
+The RATSL data contain 176 observation and 5 variables after processing of wide RATS data. Let's graphically present the data.
+
+```{r}
 p1 <- ggplot(RATSL, aes(x = Time, y = weight, linetype = ID))
 p2 <- p1 + geom_line() + scale_linetype_manual(values = rep(1:10, times=4))
 p2
@@ -32,14 +35,12 @@ p5 <- p4 + theme(panel.grid.minor.y = element_blank())
 p6 <- p5 + scale_y_continuous(limits = c(min(RATSL$weight), max(RATSL$weight)))
 p6
 
-
-                  
-
 ```
 
+Here, we can see the distribution of the weight within 3 groups over the time period 0 to 40 days. But here the data is not linear. Let's standarize the data and see what happens.
 
 ```{r}
-# Standardise the scores:
+# Standardise the weight:
 RATSL <- RATSL %>%
   group_by(Time) %>%
   mutate( stdweight = (weight - mean(weight))/sd(weight) ) %>%
@@ -51,13 +52,13 @@ p2 <- p1 + geom_line() + scale_linetype_manual(values = rep(1:10, times=4))
 p3 <- p2 + facet_grid(. ~ Group, labeller = label_both)
 p4 <- p3 + theme_bw() + theme(legend.position = "none")
 p5 <- p4 + theme(panel.grid.minor.y = element_blank())
-p6 <- p5 + scale_y_continuous(name = "standardized bprs")
+p6 <- p5 + scale_y_continuous(name = "standardized weight")
 p6
 
 
 ```
 
-
+Now the graphs look more linear as we use standard weight. weight are much higher in group 2 and 3 compare to group 1.  But in group 1 weight observation are more organized than group 2 and 3. Here data are more closed. But in group 2, we can see one line of data clearly making data isignificant. 
 
 
 ```{r}
@@ -79,6 +80,7 @@ p7 <- p6 + scale_y_continuous(name = "mean(weight) +/- se(weight)")
 p7
 
 ```
+here, mean weight are presented along with time interval for 3 Groups.
 
 ```{r}
 p1 <- ggplot(RATSL, aes(x = factor(Time), y = weight, fill = Group))
@@ -90,7 +92,7 @@ p5 <- p4 + scale_x_discrete(name = "Time")
 #p6 <- p5 + scale_fill_grey(start = 0.5, end = 1)
 p5
 ```
-
+Boxplot presentation of weight for 3 groups.
 
 ```{r}
 RATSL8S <- RATSL %>%
@@ -108,6 +110,7 @@ p5
 
 
 ```
+Applying the summary measure approach. From the graph we can see that, only group 1 is less variable in distribution compare to group 2 and 3. Perhaps, all the groups have outliers which create the bias in making conclusion of the data. Lets remove those outliers and see what happens.
 
 
 
@@ -125,6 +128,7 @@ p5
 
 
 ```
+We are only keeping observations those are less than 550 mean weight. But still we have outliers in group 1 and 3.
 
 ```{r}
 RATSL8S2 <- RATSL8S1 %>%
@@ -138,6 +142,7 @@ p5 <- p4 + scale_y_continuous(name = "mean(weight), weeks 1-8")
 p5
 
 ```
+we are keeping observations those are more than 250 mean weight and now we have outliers only in 1 group.
 
 ```{r}
 baseline <- RATS$WD1
@@ -148,10 +153,12 @@ fit <- lm(mean ~ baseline + Group, data = RATSL8S3)
 summary(fit)
 anova(fit)
 ```
+As we have 3 groups so its not possible to t-test. From the ANOVA table we can see that the variance in weight is highly significant for baseline data. While group 2 is slightly signifact for weight variance. But Group3 haqs no significance.
 
 
+2.BPRS data Analysis according to chapter 9
 
-2.BPRS data Analysis
+
 ```{r}
 BPRS <- read.table("https://raw.githubusercontent.com/KimmoVehkalahti/MABS/master/Examples/data/BPRS.txt", sep = '', header = T)
 
@@ -174,6 +181,11 @@ glimpse(BPRSL)
 
 str(BPRSL)
 
+
+```
+The BPRSL data contain 360 observation and 5 variables after processing of wide BPRS data. Let's graphically present the data.
+
+```{r}
 str(BPRS)
 p1 <- ggplot(BPRSL, aes(x = week, y = bprs, group = subject))
 p2 <- p1 + geom_text(aes(label = treatment))
@@ -183,18 +195,16 @@ p5 <- p4 + theme_bw()
 p6 <- p5 + theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 p6
 
-
 ```
-
+Plot of bprs scores against week(days) for BPRSL data. Now fit a linear models for the data where "bprs score" is a fixed effect and "week", "treatment" are explanatory variables.
 
 ```{r}
 library(lme4)
 BPRS_reg <- lm(bprs ~ week + treatment, data = BPRSL)
 summary(BPRS_reg)
 
-
 ```
-
+ Week is negatively related to bprs score. If 1 unit of week increase the score reduce by 2.27times. Treatment has no significant effect on scores.
 
 ```{r}
 p1 <- ggplot(BPRSL, aes(x = week, y = bprs))
@@ -209,10 +219,14 @@ p6
 
 
 ```
+plot of individual bprs score against week.
 
 ```{r}
 pairs(BPRS[, 1:11], cex = 0.7)
 ```
+scatter matrix of repeated measure of bprs scores in individual.
+
+now, we are fitting the best liklihood linear models for our data.
 
 ```{r, echo=TRUE}
 library("lme4")
@@ -228,15 +242,16 @@ summary(BPRS_ref1)
 anova(BPRS_ref1, BPRS_ref)
 
 ```
+Compare to our 1st model, the 2nd model is more significant in describing variance in bprs score. But in both model treatment has no effect on scores while week(time period) seems significant negative relation with scores. As time goes scores decrease. Lets fit another model and compare it with 2nd model.
 
 
 ```{r, echo=TRUE}
 BPRS_ref2 <- lmer(bprs ~ week * treatment + (week | subject), data = BPRSL, REML = FALSE)
 summary(BPRS_ref2)
-# dummies (in Table) vs summary output: D1 = Group2, D2 = Group3
 anova(BPRS_ref1, BPRS_ref2)
 ```
 
+model 3 is not very much effective compare to model 2. Lets keep model 2 and fit the model.
 
 ```{r, echo=TRUE, fig.width=3, fig.height=4}
 Fitted <- fitted(BPRS_ref1)
@@ -259,3 +274,6 @@ p7 <- p6 + ggtitle("Fitted")
 graph2 <- p7
 graph1; graph2
 ```
+
+From the graph our fitted values are much more organiged and easy to compare. They follow a clear pattern.
+
